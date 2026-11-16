@@ -4,8 +4,8 @@ import {
   WANDERING_FEATS_DB,
   getAnimistLimits,
   getApparitionBySlug
-} from "./apparitions-db.js";
-import { refreshAllTokenSpiritOrbs, registerCanvasSpiritHooks } from "./canvas-spirits.js";
+} from "./apparitions-db.js?v=1.1.1";
+import { refreshAllTokenSpiritOrbs, registerCanvasSpiritHooks } from "./canvas-spirits.js?v=1.1.1";
 import {
   MODULE_ID,
   applyDailySpiritPreset,
@@ -22,18 +22,19 @@ import {
   rollApparitionLore,
   saveDailySpiritPreset,
   setupSocketListener,
+  sustainVesselSpell,
   swapWanderingFeat,
   switchPrimaryApparition,
   syncActorSheetWithState,
   toggleAttunedApparition
-} from "./spirit-engine.js";
+} from "./spirit-engine.js?v=1.1.1";
 import {
   closeSpiritDeck,
   registerUIHooks,
   renderSpiritDeck,
   renderSpiritLauncherPill,
   toggleSpiritDeck
-} from "./ui-deck.js";
+} from "./ui-deck.js?v=1.1.1";
 
 Hooks.once("init", () => {
   console.log(`${MODULE_ID} | Initializing PF2e Animist Command Deck`);
@@ -104,10 +105,7 @@ Hooks.once("ready", () => {
     applyStarterAttunement,
     switchPrimaryApparition,
     castVesselSpell,
-    sustainVesselSpell: async (actor, vesselId, opts) => {
-      const { sustainVesselSpell } = await import("./spirit-engine.js");
-      return sustainVesselSpell(actor, vesselId, opts);
-    },
+    sustainVesselSpell,
     dismissVesselSpell,
     disperseApparition,
     restoreDispersedApparition,

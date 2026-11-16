@@ -6,8 +6,8 @@ import {
   actorHasFeat,
   getAnimistLimits,
   getApparitionBySlug
-} from "./apparitions-db.js";
-import { clearSpiritRangePreview, previewSpiritRangeOnCanvas } from "./canvas-spirits.js";
+} from "./apparitions-db.js?v=1.1.1";
+import { clearSpiritRangePreview, previewSpiritRangeOnCanvas } from "./canvas-spirits.js?v=1.1.1";
 import {
   MODULE_ID,
   applyDailySpiritPreset,
@@ -37,7 +37,7 @@ import {
   switchPrimaryApparition,
   syncActorSheetWithState,
   toggleAttunedApparition
-} from "./spirit-engine.js";
+} from "./spirit-engine.js?v=1.1.1";
 
 let deckElement = null;
 let launcherElement = null;
@@ -1079,6 +1079,10 @@ export function registerUIHooks() {
     if (!actor || !actor.isOwner || !isAnimistActor(actor)) return;
     const root = html instanceof HTMLElement ? html : html?.[0];
     if (!root) return;
+
+    // Ensure any legacy v1.0.0 window-header button is purged
+    root.closest?.(".app, .application")?.querySelectorAll?.(".acd-sheet-open-btn")?.forEach((el) => el.remove());
+    root.querySelectorAll(".acd-sheet-open-btn").forEach((el) => el.remove());
 
     const state = getActorSpiritState(actor);
     const limits = getAnimistLimits(actor);
