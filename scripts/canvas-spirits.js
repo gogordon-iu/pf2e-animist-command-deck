@@ -1,5 +1,5 @@
-import { getApparitionBySlug } from "./apparitions-db.js?v=1.1.1";
-import { MODULE_ID, getActorSpiritState, isAnimistActor } from "./spirit-engine.js?v=1.1.1";
+import { getApparitionBySlug } from "./apparitions-db.js?v=1.2.0";
+import { MODULE_ID, getActorSpiritState, isAnimistActor } from "./spirit-engine.js?v=1.2.0";
 
 const CONTAINER_NAME = "acdSpiritAuraContainer";
 let rangePreviewGraphics = null;

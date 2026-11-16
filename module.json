@@ -2,7 +2,7 @@
   "id": "pf2e-animist-command-deck",
   "title": "PF2e Animist Command Deck",
   "description": "Complete tactical Spirit Command Deck HUD, built-in War of Immortals & Lost Omens Apparition Compendium (all 14 Apparitions, 14 Vessel Spells, 4 Practices, and Wandering Feats), Pathmuncher-aware sheet & spellbook synchronizer, full combat automation (Circle of Spirits, Cast & Sustain Vessel Spells with Spell DC saves, healing pulses, Trickster's Mirrors, Grasping Spirits pull, Channeler's Stance, and Shaman Spirit Familiar), and visual PIXI token spirit orbs & emanation rings for Pathfinder 2e.",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "authors": [
     {
       "name": "curiosityeducation"
@@ -33,7 +33,7 @@
   ],
   "url": "https://github.com/gogordon-iu/pf2e-animist-command-deck",
   "manifest": "https://github.com/gogordon-iu/pf2e-animist-command-deck/releases/latest/download/module.json",
-  "download": "https://github.com/gogordon-iu/pf2e-animist-command-deck/releases/download/v1.1.1/module.zip",
+  "download": "https://github.com/gogordon-iu/pf2e-animist-command-deck/releases/download/v1.2.0/module.zip",
   "readme": "README.md",
   "license": "LICENSE"
 }

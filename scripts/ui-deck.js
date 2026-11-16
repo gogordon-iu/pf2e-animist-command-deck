@@ -6,8 +6,8 @@ import {
   actorHasFeat,
   getAnimistLimits,
   getApparitionBySlug
-} from "./apparitions-db.js?v=1.1.1";
-import { clearSpiritRangePreview, previewSpiritRangeOnCanvas } from "./canvas-spirits.js?v=1.1.1";
+} from "./apparitions-db.js?v=1.2.0";
+import { clearSpiritRangePreview, previewSpiritRangeOnCanvas } from "./canvas-spirits.js?v=1.2.0";
 import {
   MODULE_ID,
   applyDailySpiritPreset,
@@ -37,7 +37,7 @@ import {
   switchPrimaryApparition,
   syncActorSheetWithState,
   toggleAttunedApparition
-} from "./spirit-engine.js?v=1.1.1";
+} from "./spirit-engine.js?v=1.2.0";
 
 let deckElement = null;
 let launcherElement = null;
@@ -97,7 +97,8 @@ function shouldShowSpiritUI() {
 }
 
 export function renderSpiritLauncherPill() {
-  if (!shouldShowSpiritUI() || uiState.isOpen) {
+  const showPillSetting = game.settings?.get?.(MODULE_ID, "showLauncherPill") !== false;
+  if (!shouldShowSpiritUI() || uiState.isOpen || !showPillSetting) {
     if (launcherElement) {
       launcherElement.remove();
       launcherElement = null;
@@ -111,13 +112,23 @@ export function renderSpiritLauncherPill() {
   const vesselLive = state.activeVessels.length > 0;
 
   if (!launcherElement) {
-    launcherElement = document.createElement("button");
-    launcherElement.type = "button";
+    launcherElement = document.createElement("div");
     launcherElement.id = "acd-launcher-pill";
     launcherElement.className = "acd-launcher-pill";
-    launcherElement.addEventListener("click", (ev) => {
+    launcherElement.addEventListener("click", async (ev) => {
       ev.preventDefault();
+      if (ev.target.closest("[data-acd-hide-pill]")) {
+        ev.stopPropagation();
+        await game.settings?.set?.(MODULE_ID, "showLauncherPill", false);
+        ui.notifications?.info("Hidden Spirit Deck bottom pill — open anytime from your Character Sheet's Spells tab.");
+        return;
+      }
       toggleSpiritDeck(true);
+    });
+    launcherElement.addEventListener("contextmenu", async (ev) => {
+      ev.preventDefault();
+      await game.settings?.set?.(MODULE_ID, "showLauncherPill", false);
+      ui.notifications?.info("Hidden Spirit Deck bottom pill — open anytime from your Character Sheet's Spells tab.");
     });
     document.body.appendChild(launcherElement);
   }
@@ -140,6 +151,7 @@ export function renderSpiritLauncherPill() {
     <span class="acd-launcher-glyph"><i class="fa-solid fa-ghost"></i></span>
     <span class="acd-launcher-text">Spirit Deck</span>
     ${activeCount > 0 ? `<span class="acd-launcher-count ${vesselLive ? "acd-count-live" : ""}">${vesselLive ? "VESSEL" : activeCount}</span>` : ""}
+    <button type="button" class="acd-pill-hide" data-acd-hide-pill="1" title="Hide floating pill (right-click also hides)">&times;</button>
   `;
 }
 
@@ -211,6 +223,9 @@ export function renderSpiritDeck() {
         </select>
         <button type="button" class="acd-mini-sync-btn" data-action="sync-sheet" title="Synchronize Spells, Vessel Spells & Lores to Sheet">
           <i class="fa-solid fa-rotate"></i> Sync
+        </button>
+        <button type="button" class="acd-icon-btn" data-action="toggle-pill-visibility" title="${game.settings?.get?.(MODULE_ID, "showLauncherPill") !== false ? "Hide Bottom Launcher Pill" : "Show Bottom Launcher Pill"}">
+          <i class="fa-solid ${game.settings?.get?.(MODULE_ID, "showLauncherPill") !== false ? "fa-eye" : "fa-eye-slash"}"></i>
         </button>
         <button type="button" class="acd-icon-btn" data-action="close-deck" title="Close">&times;</button>
       </div>
@@ -882,6 +897,13 @@ function bindDeckDelegatedEvents(container) {
       case "close-deck":
         closeSpiritDeck();
         break;
+      case "toggle-pill-visibility": {
+        const curPill = game.settings?.get?.(MODULE_ID, "showLauncherPill") !== false;
+        await game.settings?.set?.(MODULE_ID, "showLauncherPill", !curPill);
+        ui.notifications?.info(!curPill ? "Bottom Spirit Deck pill enabled." : "Bottom Spirit Deck pill hidden.");
+        renderSpiritDeck();
+        break;
+      }
       case "switch-tab":
         uiState.activeTab = btn.dataset.tab || "battle";
         renderSpiritDeck();

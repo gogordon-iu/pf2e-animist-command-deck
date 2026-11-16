@@ -10,7 +10,7 @@ import {
   getAllKnownApparitionSpellUuids,
   getAnimistLimits,
   getApparitionBySlug
-} from "./apparitions-db.js?v=1.1.1";
+} from "./apparitions-db.js?v=1.2.0";
 
 export const MODULE_ID = "pf2e-animist-command-deck";
 export const SOCKET_NAME = `module.${MODULE_ID}`;

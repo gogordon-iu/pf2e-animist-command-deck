@@ -4,8 +4,8 @@ import {
   WANDERING_FEATS_DB,
   getAnimistLimits,
   getApparitionBySlug
-} from "./apparitions-db.js?v=1.1.1";
-import { refreshAllTokenSpiritOrbs, registerCanvasSpiritHooks } from "./canvas-spirits.js?v=1.1.1";
+} from "./apparitions-db.js?v=1.2.0";
+import { refreshAllTokenSpiritOrbs, registerCanvasSpiritHooks } from "./canvas-spirits.js?v=1.2.0";
 import {
   MODULE_ID,
   applyDailySpiritPreset,
@@ -27,17 +27,30 @@ import {
   switchPrimaryApparition,
   syncActorSheetWithState,
   toggleAttunedApparition
-} from "./spirit-engine.js?v=1.1.1";
+} from "./spirit-engine.js?v=1.2.0";
 import {
   closeSpiritDeck,
   registerUIHooks,
   renderSpiritDeck,
   renderSpiritLauncherPill,
   toggleSpiritDeck
-} from "./ui-deck.js?v=1.1.1";
+} from "./ui-deck.js?v=1.2.0";
 
 Hooks.once("init", () => {
-  console.log(`${MODULE_ID} | Initializing PF2e Animist Command Deck`);
+  console.log(`${MODULE_ID} | Initializing PF2e Animist Command Deck v1.2.0`);
+
+  game.settings.register(MODULE_ID, "showLauncherPill", {
+    name: "Show Floating Bottom Launcher Pill",
+    hint: "Displays the floating 'Spirit Deck' shortcut pill at the bottom-left of the screen (you can also click × on the pill to hide it and open the HUD from your Spells tab).",
+    scope: "client",
+    config: true,
+    type: Boolean,
+    default: true,
+    onChange: () => {
+      renderSpiritLauncherPill();
+      renderSpiritDeck();
+    }
+  });
 
   game.settings.register(MODULE_ID, "showVesselEmanationRings", {
     name: "Show Vessel Spell Emanation Rings on Canvas",
