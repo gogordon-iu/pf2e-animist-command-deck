@@ -19,6 +19,8 @@ import {
   doesSheetNeedSync,
   escapeHtml,
   executeAnimistFeatAction,
+  findSpontaneousApparitionEntry,
+  findVesselSpellcastingEntry,
   getActorSpiritState,
   getActorTokenOnCanvas,
   getAnimistSpellStats,
@@ -1071,29 +1073,152 @@ export function registerUIHooks() {
     }
   });
 
-  // Inject "Spirit Deck" button on PF2e Character Sheet
+  // Inject rich Animist Spirit Command Bar directly at the top of the Spells tab (and Actions tab)
   Hooks.on("renderCharacterSheetPF2e", (sheet, html) => {
     const actor = sheet?.actor || sheet?.object;
     if (!actor || !actor.isOwner || !isAnimistActor(actor)) return;
     const root = html instanceof HTMLElement ? html : html?.[0];
-    if (!root || root.querySelector(".acd-sheet-open-btn")) return;
+    if (!root) return;
 
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "acd-sheet-open-btn";
-    btn.innerHTML = `<i class="fa-solid fa-ghost"></i> Spirit Deck`;
-    btn.title = "Open PF2e Animist Spirit Command Deck";
-    btn.addEventListener("click", (ev) => {
-      ev.preventDefault();
-      toggleSpiritDeck(true, { actorId: actor.id });
-    });
+    const state = getActorSpiritState(actor);
+    const limits = getAnimistLimits(actor);
+    const needsSync = doesSheetNeedSync(actor, state);
+    const primarySlug = state.primary[0] ?? null;
+    const primaryApp = primarySlug ? getApparitionBySlug(primarySlug) : null;
+    const activeVessel = state.activeVessels[0] ?? null;
 
-    const targetBar =
-      root.querySelector(".window-header .window-title") ??
-      root.querySelector("aside .sidebar") ??
-      root.querySelector(".char-header");
-    if (targetBar) {
-      targetBar.after(btn);
+    const spiritBadgesHtml = state.attuned.length
+      ? state.attuned
+          .map((slug) => {
+            const app = getApparitionBySlug(slug);
+            if (!app) return "";
+            const isDispersed = state.dispersed.includes(slug);
+            const isPrimary = !isDispersed && state.primary.includes(slug);
+            const isFamiliar = !isDispersed && limits.hasSpiritFamiliar && state.familiarSpirit === slug;
+            return `<span class="acd-sb-chip ${isPrimary ? "is-primary" : ""} ${isDispersed ? "is-dispersed" : ""}">
+              <i class="${escapeHtml(app.icon)}" style="color:${escapeHtml(app.color)}"></i>
+              ${escapeHtml(app.name)}${isPrimary ? " <strong>(Primary)</strong>" : isFamiliar ? " <em>(Familiar)</em>" : isDispersed ? " <em>(Dispersed)</em>" : ""}
+            </span>`;
+          })
+          .join("")
+      : `<span class="acd-sb-empty">No spirits attuned yet — click <strong>Choose Spirits</strong> to begin.</span>`;
+
+    // 1. Primary Banner inside the Spells (Spellcasting) Tab
+    const spellTab = root.querySelector('.sheet-body .tab[data-tab="spellcasting"], .sheet-body .tab.spellcasting');
+    if (spellTab && !spellTab.querySelector(".acd-spellbook-banner")) {
+      const spellBanner = document.createElement("div");
+      spellBanner.className = "acd-spellbook-banner";
+      spellBanner.innerHTML = `
+        <div class="acd-sb-main">
+          <div class="acd-sb-title-row">
+            <span class="acd-sb-icon"><i class="fa-solid fa-ghost"></i></span>
+            <div class="acd-sb-text">
+              <div class="acd-sb-heading">
+                <strong>Animist Spirit Command Deck</strong>
+                <span class="acd-sb-count">Spirits ${state.attuned.length}/${limits.maxAttuned}</span>
+                ${activeVessel ? `<span class="acd-sb-live">Sustaining: ${escapeHtml(activeVessel.vesselName)} (Rd ${activeVessel.roundsSustained}/10)</span>` : ""}
+                ${needsSync ? `<span class="acd-sb-warn">Needs Sync</span>` : ""}
+              </div>
+              <div class="acd-sb-chips">${spiritBadgesHtml}</div>
+            </div>
+          </div>
+          <div class="acd-sb-actions">
+            <button type="button" class="acd-sb-btn acd-sb-btn-primary" data-acd-sheet="open-battle">
+              <i class="fa-solid fa-bolt"></i> Open Spirit HUD
+            </button>
+            <button type="button" class="acd-sb-btn" data-acd-sheet="open-spirits">
+              <i class="fa-solid fa-ghost"></i> ${state.attuned.length ? "Change Spirits" : "Choose Spirits"}
+            </button>
+            ${
+              activeVessel
+                ? `<button type="button" class="acd-sb-btn acd-sb-btn-accent" data-acd-sheet="quick-sustain" data-vessel-id="${escapeHtml(activeVessel.id)}">
+                    <i class="fa-solid fa-rotate"></i> 1A Sustain
+                  </button>`
+                : primaryApp
+                ? `<button type="button" class="acd-sb-btn acd-sb-btn-accent" data-acd-sheet="quick-cast" data-slug="${escapeHtml(primaryApp.slug)}" title="Cast ${escapeHtml(primaryApp.vessel.name)}">
+                    <i class="fa-solid fa-wand-sparkles"></i> Cast ${escapeHtml(primaryApp.vessel.name)}
+                  </button>`
+                : ""
+            }
+            <button type="button" class="acd-sb-btn acd-sb-btn-icon" data-acd-sheet="quick-sync" title="Synchronize Apparition Spells, Vessel Spells & Lores">
+              <i class="fa-solid fa-rotate"></i> Sync
+            </button>
+          </div>
+        </div>
+      `;
+
+      spellBanner.addEventListener("click", async (ev) => {
+        const btn = ev.target.closest("[data-acd-sheet]");
+        if (!btn) return;
+        ev.preventDefault();
+        ev.stopPropagation();
+        const cmd = btn.dataset.acdSheet;
+        if (cmd === "open-battle") {
+          toggleSpiritDeck(true, { actorId: actor.id, tab: "battle" });
+        } else if (cmd === "open-spirits") {
+          toggleSpiritDeck(true, { actorId: actor.id, tab: "attunement" });
+        } else if (cmd === "quick-cast" && btn.dataset.slug) {
+          await castVesselSpell(actor, btn.dataset.slug);
+          toggleSpiritDeck(true, { actorId: actor.id, tab: "battle" });
+        } else if (cmd === "quick-sustain" && btn.dataset.vesselId) {
+          await sustainVesselSpell(actor, btn.dataset.vesselId);
+        } else if (cmd === "quick-sync") {
+          await syncActorSheetWithState(actor, { refreshSlots: false });
+        }
+      });
+
+      const knownSpellsPane =
+        spellTab.querySelector('.spell-collections .tab[data-tab="known-spells"]') ??
+        spellTab.querySelector(".spell-collections") ??
+        spellTab;
+      knownSpellsPane.prepend(spellBanner);
+    }
+
+    // 2. Inline Quick-Open Pill on Apparition & Vessel Spellcasting Entry Headers inside Spells Tab
+    const spontEntry = findSpontaneousApparitionEntry(actor);
+    const vesselEntry = findVesselSpellcastingEntry(actor);
+    for (const entry of [vesselEntry, spontEntry]) {
+      if (!entry) continue;
+      const entryLi = root.querySelector(`.spellcasting-entry[data-item-id="${entry.id}"] .action-header`);
+      if (!entryLi || entryLi.querySelector(".acd-entry-hud-btn")) continue;
+      const entryBtn = document.createElement("button");
+      entryBtn.type = "button";
+      entryBtn.className = "acd-entry-hud-btn";
+      entryBtn.innerHTML = `<i class="fa-solid fa-ghost"></i> Spirit HUD`;
+      entryBtn.title = "Open Animist Spirit Command Deck";
+      entryBtn.addEventListener("click", (ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        toggleSpiritDeck(true, { actorId: actor.id, tab: "battle" });
+      });
+      const controlsDiv = entryLi.querySelector(".item-controls");
+      if (controlsDiv) {
+        entryLi.insertBefore(entryBtn, controlsDiv);
+      } else {
+        entryLi.appendChild(entryBtn);
+      }
+    }
+
+    // 3. Companion Launcher Strip at the top of the Actions Tab
+    const actionsTab = root.querySelector('.sheet-body .tab[data-tab="actions"], .sheet-body .tab.actions');
+    if (actionsTab && !actionsTab.querySelector(".acd-actions-banner")) {
+      const actBanner = document.createElement("div");
+      actBanner.className = "acd-actions-banner";
+      actBanner.innerHTML = `
+        <div class="acd-ab-left">
+          <i class="fa-solid fa-ghost acd-sigil"></i>
+          <span><strong>Animist Spirit Deck</strong> &middot; ${primaryApp ? `Primary: <strong>${escapeHtml(primaryApp.name)}</strong> (${escapeHtml(primaryApp.vessel.name)})` : `Spirits ${state.attuned.length}/${limits.maxAttuned}`}</span>
+        </div>
+        <button type="button" class="acd-sb-btn acd-sb-btn-primary"><i class="fa-solid fa-bolt"></i> Open Spirit HUD</button>
+      `;
+      actBanner.querySelector("button")?.addEventListener("click", (ev) => {
+        ev.preventDefault();
+        toggleSpiritDeck(true, { actorId: actor.id, tab: "battle" });
+      });
+      const strikesList = actionsTab.querySelector(".strikes-list");
+      if (strikesList?.parentNode) {
+        strikesList.parentNode.insertBefore(actBanner, strikesList);
+      }
     }
   });
 
@@ -1109,8 +1234,12 @@ export function registerUIHooks() {
     renderSpiritLauncherPill();
   });
 
-  Hooks.on(`${MODULE_ID}.stateChanged`, () => {
+  Hooks.on(`${MODULE_ID}.stateChanged`, (actor) => {
     renderSpiritLauncherPill();
     if (uiState.isOpen) renderSpiritDeck();
+    // Re-render open character sheet so Spells tab banner reflects live Primary Spirit / Sustained Vessel state
+    if (actor?.sheet?.rendered) {
+      actor.sheet.render(false);
+    }
   });
 }
