@@ -1,0 +1,45 @@
+name: Release Foundry VTT Module
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build POSIX module.zip
+        run: |
+          python3 - <<'EOF'
+          import os, zipfile
+          src = os.getcwd()
+          mod_name = "pf2e-animist-command-deck"
+          exclude = {".git", ".github", "dist", "__pycache__", "node_modules"}
+          with zipfile.ZipFile("module.zip", "w", zipfile.ZIP_DEFLATED) as zf:
+              for root, dirs, files in os.walk(src):
+                  dirs[:] = [d for d in dirs if d not in exclude]
+                  for f in sorted(files):
+                      if f.endswith(".zip"):
+                          continue
+                      full = os.path.join(root, f)
+                      arc = f"{mod_name}/" + os.path.relpath(full, src).replace("\\", "/")
+                      zf.write(full, arc)
+          EOF
+
+      - name: Publish GitHub Release Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: "PF2e Animist Command Deck ${{ github.ref_name }}"
+          files: |
+            module.json
+            module.zip
+          generate_release_notes: true

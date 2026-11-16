@@ -1,0 +1,772 @@
+/* ==========================================================================
+   PF2e Animist Command Deck — Astral Emerald, Spirit Amethyst & Deep Slate
+   ========================================================================== */
+
+.acd-launcher-pill {
+  position: fixed;
+  bottom: 18px;
+  left: 118px;
+  z-index: 70;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #09131c 0%, #162133 100%);
+  border: 1.5px solid #34d399;
+  color: #f8fafc;
+  font-family: "Signika", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.65), 0 0 12px rgba(52, 211, 153, 0.28);
+  transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease;
+  width: auto;
+}
+
+.acd-launcher-pill:hover {
+  transform: translateY(-1px);
+  border-color: #a78bfa;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.75), 0 0 15px rgba(167, 139, 250, 0.45);
+}
+
+.acd-launcher-glyph {
+  color: #34d399;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.acd-launcher-count {
+  background: #a78bfa;
+  color: #090d16;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 999px;
+}
+
+.acd-launcher-count.acd-count-live {
+  background: #34d399;
+  color: #022c22;
+}
+
+.acd-sheet-open-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0 6px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  border: 1px solid #34d399;
+  background: #0f172a;
+  color: #a7f3d0;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  width: auto;
+}
+
+/* Main Floating Spirit Deck Window */
+.acd-deck-window {
+  position: fixed;
+  width: 560px;
+  max-width: calc(100vw - 24px);
+  max-height: 84vh;
+  z-index: 96;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, #080f1a 0%, #0f172a 100%);
+  border: 1.5px solid #10b981;
+  border-radius: 12px;
+  color: #e2e8f0;
+  font-family: "Signika", sans-serif;
+  font-size: 13px;
+  box-shadow: 0 20px 46px rgba(0, 0, 0, 0.82), 0 0 0 1px rgba(52, 211, 153, 0.2);
+  overflow: hidden;
+}
+
+.acd-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  background: linear-gradient(90deg, #064e3b 0%, #1e1b4b 60%, #0f172a 100%);
+  border-bottom: 1px solid rgba(52, 211, 153, 0.35);
+  cursor: grab;
+  user-select: none;
+}
+
+.acd-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 800;
+  color: #ecfdf5;
+}
+
+.acd-sigil {
+  color: #34d399;
+}
+
+.acd-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.acd-actor-select,
+.acd-inline-select {
+  background: #0f172a;
+  color: #f1f5f9;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 12px;
+  height: 26px;
+  max-width: 175px;
+}
+
+.acd-mini-sync-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(16, 185, 129, 0.18);
+  border: 1px solid #10b981;
+  color: #a7f3d0;
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  width: auto;
+}
+
+.acd-icon-btn {
+  background: transparent;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  color: #cbd5e1;
+  border-radius: 6px;
+  width: 26px;
+  height: 26px;
+  line-height: 1;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.acd-subheader {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 6px 14px;
+  background: #0b1322;
+  border-bottom: 1px solid #1e293b;
+  font-size: 12px;
+  color: #cbd5e1;
+}
+
+.acd-stat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(30, 41, 59, 0.7);
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid #1e293b;
+}
+
+.acd-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  background: #090e1a;
+  border-bottom: 1px solid #1e293b;
+}
+
+.acd-tab {
+  background: transparent;
+  border: none;
+  border-bottom: 2.5px solid transparent;
+  color: #94a3b8;
+  padding: 8px 6px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 0;
+  transition: color 0.12s ease, background 0.12s ease;
+}
+
+.acd-tab:hover {
+  color: #e2e8f0;
+  background: rgba(52, 211, 153, 0.06);
+}
+
+.acd-tab.active {
+  color: #34d399;
+  border-bottom-color: #34d399;
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.acd-body {
+  padding: 12px 14px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Sync Alert Banner */
+.acd-sync-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.2), rgba(124, 58, 237, 0.18));
+  border: 1px solid #34d399;
+}
+
+.acd-sync-banner p {
+  margin: 2px 0 0;
+  font-size: 11.5px;
+  color: #cbd5e1;
+}
+
+/* Focus Bar */
+.acd-focus-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #111c2f;
+  border: 1px solid #1e293b;
+}
+
+.acd-focus-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.acd-pips {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.acd-focus-pip {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border-radius: 6px;
+  border: 1px solid #475569;
+  background: #0f172a;
+  color: #64748b;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.acd-focus-pip.filled {
+  border-color: #34d399;
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.16);
+}
+
+/* Active Vessel Live Card */
+.acd-vessel-live-card {
+  padding: 10px 12px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, rgba(6, 78, 59, 0.35), rgba(15, 23, 42, 0.92));
+  border: 1.5px solid #34d399;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.acd-vessel-live-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.acd-live-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 8px #34d399;
+  margin-right: 5px;
+}
+
+.acd-vessel-live-actions,
+.acd-spirit-actions,
+.acd-btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Spirit Cards */
+.acd-spirits-list,
+.acd-rep-list,
+.acd-wandering-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.acd-spirit-card,
+.acd-rep-card {
+  padding: 10px 12px;
+  border-radius: 9px;
+  background: #111827;
+  border: 1px solid #1f2937;
+  border-left: 4px solid var(--spirit-color, #a78bfa);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.acd-spirit-card.is-primary {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.11), #111827 65%);
+  border-color: rgba(52, 211, 153, 0.5);
+}
+
+.acd-spirit-card.is-dispersed {
+  opacity: 0.62;
+  filter: grayscale(0.45);
+}
+
+.acd-spirit-card-head,
+.acd-rep-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.acd-spirit-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.acd-pill-primary,
+.acd-pill-familiar,
+.acd-pill-dispersed,
+.acd-badge,
+.acd-role-tag {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 999px;
+  letter-spacing: 0.03em;
+}
+
+.acd-pill-primary {
+  background: #10b981;
+  color: #022c22;
+}
+
+.acd-pill-familiar {
+  background: #0284c7;
+  color: #f0f9ff;
+}
+
+.acd-pill-dispersed {
+  background: #475569;
+  color: #e2e8f0;
+}
+
+.acd-badge {
+  background: #1e293b;
+  color: #cbd5e1;
+  border: 1px solid #334155;
+}
+
+.acd-badge-ok {
+  background: rgba(16, 185, 129, 0.2);
+  color: #6ee7b7;
+  border-color: #059669;
+}
+
+.acd-badge-warn {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fcd34d;
+  border-color: #d97706;
+}
+
+.acd-role-tag {
+  background: rgba(167, 139, 250, 0.18);
+  color: #ddd6fe;
+  text-transform: uppercase;
+}
+
+.acd-spirit-lores,
+.acd-rep-meta {
+  font-size: 11px;
+  color: #94a3b8;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.acd-spirit-mini-desc {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.38;
+  color: #cbd5e1;
+}
+
+/* Buttons */
+.acd-primary-btn,
+.acd-secondary-btn,
+.acd-ghost-btn,
+.acd-danger-mini {
+  width: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.acd-primary-btn {
+  background: linear-gradient(135deg, #059669, #10b981);
+  border: 1px solid #34d399;
+  color: #022c22;
+}
+
+.acd-primary-btn:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.acd-secondary-btn {
+  background: #1e293b;
+  border: 1px solid #475569;
+  color: #e2e8f0;
+}
+
+.acd-secondary-btn:hover:not(:disabled) {
+  border-color: #a78bfa;
+  color: #f8fafc;
+}
+
+.acd-ghost-btn {
+  background: transparent;
+  border: 1px solid #334155;
+  color: #94a3b8;
+}
+
+.acd-danger-mini {
+  background: rgba(225, 29, 72, 0.18);
+  border: 1px solid #e11d48;
+  color: #fda4af;
+}
+
+/* Sections & Feats */
+.acd-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 4px;
+}
+
+.acd-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 800;
+  color: #a7f3d0;
+  border-bottom: 1px solid #1e293b;
+  padding-bottom: 4px;
+}
+
+.acd-feat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.acd-feat-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 6px 9px;
+  border-radius: 7px;
+  background: #111c2f;
+  border: 1px solid #334155;
+  color: #e2e8f0;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.acd-feat-btn.is-active {
+  border-color: #34d399;
+  background: rgba(16, 185, 129, 0.18);
+}
+
+.acd-feat-btn.is-cooldown {
+  opacity: 0.55;
+}
+
+.acd-feat-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 700;
+}
+
+.acd-feat-meta {
+  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: #0f172a;
+  color: #a78bfa;
+  flex-shrink: 0;
+}
+
+.acd-lore-row,
+.acd-role-chips,
+.acd-spell-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.acd-lore-chip,
+.acd-chip {
+  width: auto;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: #172554;
+  border: 1px solid #3b82f6;
+  color: #dbeafe;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.acd-chip {
+  background: #0f172a;
+  border-color: #334155;
+  color: #94a3b8;
+}
+
+.acd-chip.active {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: #34d399;
+  color: #ecfdf5;
+}
+
+.acd-search-input {
+  width: 100%;
+  background: #0f172a;
+  border: 1px solid #334155;
+  color: #f8fafc;
+  border-radius: 7px;
+  padding: 6px 10px;
+  margin-bottom: 6px;
+}
+
+.acd-rep-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.acd-spell-pill {
+  font-size: 10.5px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  color: #64748b;
+}
+
+.acd-spell-pill.unlocked {
+  border-color: rgba(52, 211, 153, 0.45);
+  color: #d1fae5;
+}
+
+.acd-wandering-row,
+.acd-guide-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #111827;
+  border: 1px solid #1e293b;
+}
+
+.acd-guide-card {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.acd-wandering-row.locked,
+.acd-guide-card.locked {
+  opacity: 0.55;
+}
+
+/* ==========================================================================
+   Chat Cards — Wrap-Safe Narrow Sidebar Layout (BUG-261115-03 Compliant)
+   ========================================================================== */
+
+.acd-chat-card {
+  border-left: 4px solid #34d399;
+  background: #0f172a;
+  color: #e2e8f0;
+  border-radius: 7px;
+  padding: 8px 10px;
+  font-size: 12px;
+}
+
+.acd-chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 5px;
+  color: #f8fafc;
+}
+
+.acd-chat-tag {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(52, 211, 153, 0.18);
+  color: #6ee7b7;
+  white-space: nowrap;
+}
+
+.acd-chat-desc,
+.acd-chat-note,
+.acd-chat-hint {
+  margin: 4px 0;
+  line-height: 1.38;
+  color: #cbd5e1;
+}
+
+.acd-chat-hint {
+  font-size: 11px;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.acd-roll-banner {
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: rgba(30, 41, 59, 0.85);
+  border: 1px solid #334155;
+  margin: 5px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.acd-banner-heal {
+  border-color: #10b981;
+  background: rgba(6, 78, 59, 0.45);
+}
+
+.acd-stance-pill {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: #7c3aed;
+  color: #f5f3ff;
+}
+
+.acd-target-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 6px;
+}
+
+.acd-target-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 5px;
+  padding: 4px 6px;
+  border-radius: 5px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid #1e293b;
+}
+
+.acd-target-name {
+  min-width: 90px;
+  max-width: 100%;
+  font-weight: 700;
+  color: #f1f5f9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.acd-target-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.acd-chat-mini-btn,
+.acd-chat-btn {
+  width: auto;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: #1e293b;
+  border: 1px solid #475569;
+  color: #f8fafc;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.acd-chat-btn {
+  padding: 5px 9px;
+  margin-top: 4px;
+}
+
+.acd-btn-dmg {
+  border-color: #f97316;
+  color: #fed7aa;
+}
+
+.acd-btn-crit {
+  border-color: #ef4444;
+  color: #fecaca;
+}
+
+.acd-btn-heal {
+  border-color: #10b981;
+  color: #a7f3d0;
+}
